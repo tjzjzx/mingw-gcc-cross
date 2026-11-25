@@ -47,7 +47,7 @@ declare -r ninja_directory='/var/tmp/ninja-1.12.1'
 declare -r nz_directory="${workdir}/submodules/nz"
 declare -r nz_prefix='/var/tmp/nz'
 
-declare -r max_jobs='30'
+declare -r max_jobs="${MAX_JOBS:-$(nproc)}"
 
 declare -r ccflags='-w -O2'
 declare -r linkflags='-Xlinker -s'
@@ -448,7 +448,7 @@ fi
 	CXXFLAGS="${ccflags}" \
 	LDFLAGS="${linkflags}"
 
-make all --jobs
+make all --jobs="${max_jobs}"
 make install
 
 [ -d "${mpfr_directory}/build" ] || mkdir "${mpfr_directory}/build"
@@ -465,7 +465,7 @@ cd "${mpfr_directory}/build"
 	CXXFLAGS="${ccflags}" \
 	LDFLAGS="${linkflags}"
 
-make all --jobs
+make all --jobs="${max_jobs}"
 make install
 
 [ -d "${mpc_directory}/build" ] || mkdir "${mpc_directory}/build"
@@ -482,7 +482,7 @@ cd "${mpc_directory}/build"
 	CXXFLAGS="${ccflags}" \
 	LDFLAGS="${linkflags}"
 
-make all --jobs
+make all --jobs="${max_jobs}"
 make install
 
 [ -d "${isl_directory}/build" ] || mkdir "${isl_directory}/build"
@@ -507,7 +507,7 @@ fi
 	CXXFLAGS="${ccflags}" \
 	LDFLAGS="${linkflags} ${isl_ldflags}"
 
-make all --jobs
+make all --jobs="${max_jobs}"
 make install
 
 [ -d "${zlib_directory}/build" ] || mkdir "${zlib_directory}/build"
@@ -522,7 +522,7 @@ rm --force --recursive ./*
 	CXXFLAGS="${ccflags}" \
 	LDFLAGS="${linkflags}"
 
-make all --jobs
+make all --jobs="${max_jobs}"
 make install
 
 unlink "${toolchain_directory}/lib/libz.a"
@@ -540,7 +540,7 @@ cd "${yasm_directory}/build"
 	CXXFLAGS="${ccflags}" \
 	LDFLAGS="${linkflags}"
 
-make all --jobs
+make all --jobs="${max_jobs}"
 make install
 
 [ -d "${coreutils_directory}/build" ] || mkdir "${coreutils_directory}/build"
@@ -673,6 +673,15 @@ for triplet in "${targets[@]}"; do
 	
 	declare specs='%{!Qy: -Qn}'
 	
+	# Match MSYS2 packages: posix threads (winpthreads) so that the packages
+	# installed through apt/nouzen are ABI-compatible. The aarch64 sysroot is
+	# built without winpthreads, so it has to keep the win32 thread model.
+	declare threads='posix'
+	
+	if [ "${triplet}" = 'aarch64-w64-mingw32-ucrt' ]; then
+		threads='win32'
+	fi
+	
 	declare target="${triplet/-msvcrt/}"
 	target="${target/-ucrt/}"
 	
@@ -789,7 +798,7 @@ for triplet in "${targets[@]}"; do
 		--enable-lto \
 		--enable-plugin \
 		--enable-shared \
-		--enable-threads='win32' \
+		--enable-threads="${threads}" \
 		--enable-libstdcxx-threads \
 		--enable-libssp \
 		--enable-host-pie \
