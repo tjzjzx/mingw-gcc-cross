@@ -537,8 +537,8 @@ cd "${yasm_directory}/build"
 	--prefix="${toolchain_directory}" \
 	--enable-shared \
 	--disable-static \
-	CFLAGS="${ccflags}" \
-	CXXFLAGS="${ccflags}" \
+	CFLAGS="${ccflags} -std=gnu17" \
+	CXXFLAGS="${ccflags} -std=gnu17" \
 	LDFLAGS="${linkflags}"
 
 make all --jobs="${max_jobs}"
