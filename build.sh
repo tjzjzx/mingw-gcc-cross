@@ -284,7 +284,7 @@ if ! [ -f "${zlib_tarball}" ]; then
 		--extract \
 		--file="${zlib_tarball}"
 	
-	patch --directory="${zlib_directory}" --strip='1' --input="${workdir}/submodules/obggcc/patches/0001-Remove-versioned-SONAME-from-libz.patch"
+	patch --directory="${zlib_directory}" --strip='1' --input="${workdir}/patches/0001-Remove-versioned-SONAME-from-libz.patch"
 fi
 
 if ! [ -f "${zstd_tarball}" ]; then
