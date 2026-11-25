@@ -769,6 +769,9 @@ for triplet in "${targets[@]}"; do
 		"${toolchain_directory}/${triplet}" \
 		"${toolchain_directory}/${target}"
 	
+	echo "- Verifying sysroot alias '${toolchain_directory}/${target}'"
+	ls -ld "${toolchain_directory}/${target}" || true
+	
 	../configure \
 		--host="${CROSS_COMPILE_TRIPLET}" \
 		--target="${target}" \
@@ -839,12 +842,22 @@ for triplet in "${targets[@]}"; do
 		chmod +x "/var/tmp/${target}-g++"
 	fi
 	
-	echo "- Probing sysroot layout for '${target}'"
-	ls -ld "${toolchain_directory}/${target}" "${toolchain_directory}/${triplet}" || true
-	ls -l "${toolchain_directory}/${target}/include/float.h" || true
+	# GCC's tooldir is '${prefix}/${target}', so the target's system headers
+	# are only reachable through this alias. Make sure it still resolves
+	# before the target libraries are built.
+	if ! test -f "${toolchain_directory}/${target}/include/float.h"; then
+		echo "- Recreating missing sysroot alias '${target}'"
+		rm --force --recursive "${toolchain_directory}/${target}"
+		ln \
+			--symbolic \
+			"${toolchain_directory}/${triplet}" \
+			"${toolchain_directory}/${target}"
+	fi
+	
+	test -f "${toolchain_directory}/${target}/include/float.h"
 	
 	env ${environment} make \
-		all --jobs="${max_jobs}" CFLAGS_FOR_TARGET='-v'
+		all --jobs="${max_jobs}"
 	make install
 	
 	
