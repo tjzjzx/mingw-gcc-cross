@@ -29,8 +29,9 @@ declare -r binutils_directory='/var/tmp/binutils'
 declare -r gcc_tarball='/var/tmp/gcc.tar.xz'
 declare -r gcc_directory="/var/tmp/gcc-releases-gcc-${gcc_major}"
 
+declare -r zlib_commit='617e19a81f38c15ff04de9f86882f42ad8a8ffd1'
 declare -r zlib_tarball='/var/tmp/zlib.tar.gz'
-declare -r zlib_directory='/var/tmp/zlib-develop'
+declare -r zlib_directory="/var/tmp/zlib-${zlib_commit}"
 
 declare -r zstd_tarball='/var/tmp/zstd.tar.gz'
 declare -r zstd_directory='/var/tmp/zstd-dev'
@@ -269,7 +270,7 @@ fi
 
 if ! [ -f "${zlib_tarball}" ]; then
 	curl \
-		--url 'https://github.com/madler/zlib/archive/refs/heads/develop.tar.gz' \
+		--url "https://github.com/madler/zlib/archive/${zlib_commit}.tar.gz" \
 		--retry '30' \
 		--retry-all-errors \
 		--retry-delay '0' \
