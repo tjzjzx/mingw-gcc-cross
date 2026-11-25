@@ -839,8 +839,12 @@ for triplet in "${targets[@]}"; do
 		chmod +x "/var/tmp/${target}-g++"
 	fi
 	
+	echo "- Probing sysroot layout for '${target}'"
+	ls -ld "${toolchain_directory}/${target}" "${toolchain_directory}/${triplet}" || true
+	ls -l "${toolchain_directory}/${target}/include/float.h" || true
+	
 	env ${environment} make \
-		all --jobs="${max_jobs}"
+		all --jobs="${max_jobs}" CFLAGS_FOR_TARGET='-v'
 	make install
 	
 	
