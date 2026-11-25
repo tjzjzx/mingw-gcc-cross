@@ -996,6 +996,14 @@ find \
 	-name '*.py' -delete -o \
 	-name '*.json' -delete
 
+# Strip the debug symbols shipped within the target DLLs
+for triplet in "${targets[@]}"; do
+	find \
+		"${toolchain_directory}/${triplet}" \
+		-name '*.dll' -print0 | \
+		xargs --null --no-run-if-empty "${toolchain_directory}/bin/${triplet}-strip"
+done
+
 declare cc='gcc'
 declare readelf='readelf'
 
