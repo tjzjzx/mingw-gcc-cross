@@ -613,7 +613,7 @@ if [[ "${CROSS_COMPILE_TRIPLET}" != *'-android'* ]]; then
 	cmake --install "${PWD}" --strip
 fi
 
-printf '%s\n' '#!/bin/bash' '/var/tmp/bin/ln --symbolic --relative \"\${@}\"' > '/var/tmp/ln'
+printf '%s\n' '#!/bin/bash' '/var/tmp/bin/ln --symbolic --relative "${@}"' > '/var/tmp/ln'
 
 chmod +x '/var/tmp/ln'
 
