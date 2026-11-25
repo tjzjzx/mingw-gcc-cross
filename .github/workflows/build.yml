@@ -1,5 +1,8 @@
 name: Build
 
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: '0 6 * * *'
@@ -39,7 +42,6 @@ jobs:
       uses: actions/cache@main
       with:
         key: gcc-16
-        lookup-only: true
         path: |
           /var/tmp/x86_64-linux-gnu.tar.xz
           /var/tmp/x86_64-linux-gnu.tar.xz.sha256
@@ -55,6 +57,10 @@ jobs:
         while read file; do
             logs+="${file} "
         done <<< $(find "/var/tmp/"*"/build" -wholename '*.log' -o -wholename '*.yaml' -o -wholename '*Makefile')
+        
+        if [ -z "${logs}" ]; then
+            exit 0
+        fi
         
         tar --create --file=- ${logs} | xz --threads='0' --compress -9 > '/var/tmp/logs.tar.xz'
     - name: Upload logs
@@ -72,7 +78,6 @@ jobs:
         tar --directory='/var/tmp' --create --file=- 'mingw-gcc-cross' | xz --threads='0' --compress -9 > "${tarball_filename}"
         sha256sum "${tarball_filename}" | sed 's|/var/tmp/||' > "${tarball_filename}.sha256"
     - name: Upload artifact
-      if: ${{ steps.check-cache.outputs.cache-hit != 'true' }}
       uses: actions/upload-artifact@main
       with:
         name: native-toolchain
@@ -101,7 +106,7 @@ jobs:
         with:
           tag_name: gcc-16
           name: GCC 16
-          files: ./*/*-unknown-*.tar.xz*
+          files: ./*/*.tar.xz*
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
